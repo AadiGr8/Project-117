@@ -12,48 +12,30 @@ def home():
     return render_template('index.html')
 
 # write a route for post request
-@app.route('/sentiment' , methods = ['POST'])
-def review():
+@app.route('/predict' , methods = ['POST'])
+def predict():
 
     # extract the customer_review by writing the appropriate 'key' from the JSON data
-    review = request.json.get('text')
+    review = request.json.get('customer_review')
+    response=''
 
     # check if the customer_review is empty, return error
     if not review:
 
-        response = {
+        response = jsonify({
                     "status": "error",
                     "message": "Please enter some text to predict emotion!"
-                  }
-
-        return jsonify({'status' : 'error' , 
-                        'message' : 'Empty response'})
-
-    # if review is not empty, pass it through the 'predict' function.
-        
-    # predict function returns 2 things : sentiment and path of image in static folder
-        
-    # example : Positive , ./static/assets/emoticons/positive.png
+                  })
 
     else:
-        predicted_emotion,predicted_emotion_img_url = predict(input_text)
+        predicted_emotion,predicted_emotion_img_url = sa.predict(review)
 
-        response = {
+        response = jsonify({
                     "status": "success",
-                    "data": {
-                            "predicted_emotion": predicted_emotion,
-                            "predicted_emotion_img_url": predicted_emotion_img_url
-                            }  
-                   }
-
-        return jsonify({
-                    "status": "success",
-                    "data": {
-                            "predicted_emotion": predicted_emotion,
-                            "predicted_emotion_img_url": predicted_emotion_img_url
-                            }  
+                    "prediction": predicted_emotion,
+                    'url': predicted_emotion_img_url
                    })
-
+    return response
 
 if __name__  ==  "__main__":
     app.run(debug = True)
